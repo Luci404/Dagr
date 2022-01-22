@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Luci404/Dagr/issues"
   },
-  "homepage": "https://github.com/Luci404/Dagr#readme"
+  "homepage": "https://github.com/Luci404/Dagr#readme",
+  "dependencies": {
+    "express": "^4.17.2"
+  }
 }

@@ -1,57 +1,66 @@
-var http = require('http');
-var fs = require('fs');
-var path = require('path');
 
-const hostname = '127.0.0.1';
-const port = 3000;
+const express = require('express')
+const bodyParser = require('body-parser')
+const fs = require('fs')
+const { json } = require('body-parser')
 
-http.createServer((request, response) => {
-  var filePath = '.' + request.url;
+const port = 3000
+const app = express()
 
-  if (filePath == "./")
-  {
-    filePath = "./index.html"
-  }
+var jsonParser = bodyParser.json()
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
-  var extname = String(path.extname(filePath)).toLowerCase();
-  var mimeTypes = {
-      '.html': 'text/html',
-      '.js': 'text/javascript',
-      '.css': 'text/css',
-      '.json': 'application/json',
-      '.png': 'image/png',
-      '.jpg': 'image/jpg',
-      '.gif': 'image/gif',
-      '.svg': 'image/svg+xml',
-      '.wav': 'audio/wav',
-      '.mp4': 'video/mp4',
-      '.woff': 'application/font-woff',
-      '.ttf': 'application/font-ttf',
-      '.eot': 'application/vnd.ms-fontobject',
-      '.otf': 'application/font-otf',
-      '.wasm': 'application/wasm'
-  };
+var userData = {}
 
-  var contentType = mimeTypes[extname] || 'application/octet-stream';
-
-  fs.readFile(filePath, function(error, content) {
-      if (error) {
-          if(error.code == 'ENOENT') {
-              fs.readFile('./404.html', function(error, content) {
-                  response.writeHead(404, { 'Content-Type': 'text/html' });
-                  response.end(content, 'utf-8');
-              });
-          }
-          else {
-              response.writeHead(500);
-              response.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
-          }
-      }
-      else {
-          response.writeHead(200, { 'Content-Type': contentType });
-          response.end(content, 'utf-8');
-      }
+function LoadUserData() {
+  fs.readFile("./database.json", "utf8", (err, jsonString) => {
+    if (err) {
+      console.log("File read failed:", err);
+      return;
+    }
+    try {
+      userData = JSON.parse(jsonString);
+    } catch (err) {
+      console.log("Error parsing JSON string:", err);
+    }
   });
-}).listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
+}
+
+function SaveUserData() {
+  const jsonString = JSON.stringify(userData)
+  fs.writeFile('./database.json', jsonString, err => {
+    if (err) {
+      console.log('Error writing file', err)
+    } else {
+      console.log('Successfully wrote file')
+    }
+  })
+}
+
+LoadUserData();
+
+app.get('/', (req, res) => {
+  res.sendFile('./index.html', { root: __dirname })
+})
+
+app.get('/nutrition', (req, res) => {
+  res.sendFile('./nutrition.html', { root: __dirname })
+})
+
+app.post('/nutrition/addsource', urlencodedParser, function (req, res) {
+  console.log(req.body)
+  
+  userData.nutrition.sources.push({ 
+    name: req.body.name, 
+    calories: parseInt(req.body.calories)
+  })
+  
+  SaveUserData();
+
+  res.redirect('/nutrition')
+
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
