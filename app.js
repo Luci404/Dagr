@@ -39,6 +39,11 @@ function SaveUserData() {
 
 LoadUserData();
 
+
+app.get('/', (req, res) => {
+  res.render('index')
+})
+
 app.get('/nutrition', (req, res) => {
   res.render('nutrition', {nutrition: userData.nutrition})
 })
