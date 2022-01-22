@@ -2,9 +2,70 @@
 <html>
     <head>
         <meta name="mobile-web-app-capable" content="yes">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- https://developers.google.com/web/fundamentals/native-hardware/fullscreen/#launching_a_page_fullscreen_from_home_screen -->
+    
+        <style>
+            @font-face {
+                font-family: "Consolas";
+                src: url(/fonts/Consolas.ttf) format("truetype");
+            }
+
+            body
+            {
+                background-color: #1c1b20;
+            }
+
+            h1
+            {
+                color:#ffffff;
+                font-size: 1.8rem;
+                font-family: "Consolas", monospace;
+            }
+            
+            p
+            {
+                color:#665e72;
+                font-family: "Consolas", monospace;
+            }
+
+            a
+            {
+                text-decoration: none;
+            }
+
+            .main
+            {
+                padding: 5%;
+            }
+
+            .card
+            {
+                border-radius: 1.2rem;
+                padding: 2.5rem;
+                background-color: #f5b504;
+            }
+        </style>
     </head>
     <body>
-        <a href="/nutrition">Nutrition</a>
+        <div class="main">
+            <h1>Dagr</h1>
+            <p style="font-size: 0.8rem;">"Some fancy quote" - Nice Guy Fred</p>
+            <br>
+
+            <a href="/nutrition" >
+                <div class="card">
+                    <p style="color: #1c1b20;"><b>Nutrition</b></p>
+                </div>
+            </a>
+
+            <br>
+
+            <a href="/snippets" >
+                <div class="card">
+                    <p style="color: #1c1b20;"><b>Snippets</b></p>
+                </div>
+            </a>
+        </div>
     </body>
 </html>

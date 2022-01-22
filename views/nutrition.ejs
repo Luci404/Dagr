@@ -21,20 +21,14 @@
         <% } %>
 
             <script>
-                const xhttp = new XMLHttpRequest();
-
+                
                 function removeSource(id) {
-                    console.log(id)
+                    const xhttp = new XMLHttpRequest();
                     xhttp.open("DELETE", `/nutrition/removesource/${id}`, true);
                     xhttp.onload = function () {
                         console.log("xhttp.onload")
                         location.reload();
-                        /*var users = JSON.parse(xhttp.responseText);
-                        if (xhttp.readyState == 4 && xhttp.status == "200") {
-                            console.table(users);
-                        } else {
-                            console.error(users);
-                        }*/
+                        // TODO: Handle errors in xhttp.responseText, if (xhttp.readyState == 4 && xhttp.status) success.
                     }
                     xhttp.send(null);
                 }

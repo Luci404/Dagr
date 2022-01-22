@@ -1,3 +1,9 @@
+ignore/
+
+#
+# nodejs
+#
+
 # Logs
 logs
 *.log
