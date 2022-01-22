@@ -2,9 +2,7 @@
 
 <body>
     <h1>Goal: 1900</h1>
-    <h1>Current: 1200</h1>
-    <h2> - Breakfast: 500</h2>
-    <h2> - Lunch: 500</h2>
+    <h1>Current: <%= nutrition.reports[0].calories %></h1>
 
     <form action="/nutrition/addsource" method="post">
         <input name="name" type="text">
@@ -12,28 +10,59 @@
         <input type="submit" value="OK">
     </form>
 
+    <h2> Daily Report </h2>
+    <% for( var i=0; i < nutrition.reports[0].sources.length; i++){ %>
+        <li>
+            <button onclick="removeSourceFromReport(<%= i %>)"> (Remove) </button>
+            <%= nutrition.sources[nutrition.reports[0].sources[i]].name %> 
+        </li>
+    <% } %>
+
+
     <h2> Sources </h2>
     <% for( var i=0; i < nutrition.sources.length; i++){ %>
         <li>
             <button onclick="removeSource(<%= i %>)"> (Remove) </button>
             <%= nutrition.sources[i].name %>
+            <button onclick="addSourceToReport(<%= i %>)"> (Add to report) </button>
+
         </li>
-        <% } %>
+    <% } %>
 
-            <script>
-                
-                function removeSource(id) {
-                    const xhttp = new XMLHttpRequest();
-                    xhttp.open("DELETE", `/nutrition/removesource/${id}`, true);
-                    xhttp.onload = function () {
-                        console.log("xhttp.onload")
-                        location.reload();
-                        // TODO: Handle errors in xhttp.responseText, if (xhttp.readyState == 4 && xhttp.status) success.
-                    }
-                    xhttp.send(null);
-                }
+    <script>
+        function removeSource(id) {
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("DELETE", `/nutrition/removesource/${id}`, true);
+            xhttp.onload = function () {
+                console.log("xhttp.onload")
+                location.reload();
+                // TODO: Handle errors in xhttp.responseText, if (xhttp.readyState == 4 && xhttp.status) success.
+            }
+            xhttp.send(null);
+        }
+        
+        function addSourceToReport(id) {
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("PATCH", `/nutrition/addsourcetoreport/${id}`, true);
+            xhttp.onload = function () {
+                console.log("xhttp.onload")
+                location.reload();
+                // TODO: Handle errors in xhttp.responseText, if (xhttp.readyState == 4 && xhttp.status) success.
+            }
+            xhttp.send(null);
+        }
 
-            </script>
+        function removeSourceFromReport(id) {
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("PATCH", `/nutrition/removesourcefromreport/${id}`, true);
+            xhttp.onload = function () {
+                console.log("xhttp.onload")
+                location.reload();
+                // TODO: Handle errors in xhttp.responseText, if (xhttp.readyState == 4 && xhttp.status) success.
+            }
+            xhttp.send(null);
+        }
+    </script>
 </body>
 
 </html>
