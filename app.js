@@ -84,6 +84,26 @@ app.delete("/nutrition/removesource/:id", function(req, res) {
   res.redirect('/nutrition')
 })
 
+// Snippets
+app.get('/snippets', (req, res) => {
+  res.render('snippets', {snippets: userData.snippets})
+})
+
+app.post('/snippets/addsnippet', (req, res) => {
+  userData.snippets.snippets.push({ 
+    text: req.body.text
+  })
+  SaveUserData();
+  res.redirect('/snippets')
+})
+
+app.delete("/snippets/remove/:id", function(req, res) {
+  userData.snippets.snippets.splice(parseInt(req.params.id), 1)
+  SaveUserData();
+  res.redirect('/nutrition')
+})
+
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })

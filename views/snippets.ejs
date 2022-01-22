@@ -1,0 +1,32 @@
+<html>
+
+<body>
+    
+    <textarea name="text" form="addsnippet"></textarea>
+    <form action="/snippets/addsnippet" method="post" id="addsnippet">
+        <input type="submit" value="OK">
+    </form>
+
+    <h2> Snippets </h2>
+    <% for( var i=0; i < snippets.snippets.length; i++){ %>
+        <li>
+            <button onclick="removeSnippet(<%= i %>)"> (Remove) </button>
+            <%= snippets.snippets[i].text %> 
+        </li>
+    <% } %>
+
+    <script>
+        function removeSnippet(id) {
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("DELETE", `/snippets/remove/${id}`, true);
+            xhttp.onload = function () {
+                console.log("xhttp.onload")
+                location.reload();
+                // TODO: Handle errors in xhttp.responseText, if (xhttp.readyState == 4 && xhttp.status) success.
+            }
+            xhttp.send(null);
+        }
+    </script>
+</body>
+
+</html>
