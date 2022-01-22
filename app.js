@@ -56,7 +56,8 @@ app.post('/nutrition/addsource', function (req, res) {
 })
 
 app.delete("/nutrition/removesource/:id", function(req, res) {
-  userData.nutrition.sources.splice(parseInt(req.params.id))
+  userData.nutrition.sources.splice(parseInt(req.params.id), 1)
+  SaveUserData();
   res.redirect('/nutrition')
 })
 
