@@ -3,15 +3,15 @@
 <body>
     
     <textarea name="text" form="addsnippet"></textarea>
-    <form action="/snippets/addsnippet" method="post" id="addsnippet">
+    <form action="/snippets/add" method="post" id="addsnippet">
         <input type="submit" value="OK">
     </form>
 
     <h2> Snippets </h2>
-    <% for( var i=0; i < snippets.snippets.length; i++){ %>
+    <% for( var i=0; i < snippets.length; i++){ %>
         <li>
             <button onclick="removeSnippet(<%= i %>)"> (Remove) </button>
-            <%= snippets.snippets[i].text %> 
+            <%= snippets[i].Headers %> 
         </li>
     <% } %>
 

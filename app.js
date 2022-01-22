@@ -1,8 +1,67 @@
-
+const XLSX = require('xlsx')
+const fs = require('fs')
 const express = require('express')
 const bodyParser = require('body-parser')
-const fs = require('fs')
-const { json } = require('body-parser')
+
+// TODO: Deleting all elements in a xlsx worksheet will result in an error when saving; therefor don't allow deletion of the header row (row 0). 
+
+//  #region XLSX helpers
+const ec = (r, c) => {
+  return XLSX.utils.encode_cell({r:r,c:c})
+}
+
+const delete_row = (ws, row_index) => {
+  let range = XLSX.utils.decode_range(ws["!ref"])
+  for(var R = row_index; R <= range.e.r; ++R){
+      for(var C = range.s.c; C <= range.e.c; ++C){
+          ws[ec(R, C)] = ws[ec(R+1, C)]
+      }
+  }
+  range.e.r--
+  ws['!ref'] = XLSX.utils.encode_range(range.s, range.e)
+}
+// #endregion
+
+// #region Nutrition database
+const nutritionDatabasePath = './data/nutrition.xlsx' 
+if (!fs.existsSync(nutritionDatabasePath))
+{
+  const newNutritionWorkBook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(newNutritionWorkBook, [], "meta")
+  XLSX.writeFile(newNutritionWorkBook, nutritionDatabasePath)
+}
+const nutritionWorkBook = XLSX.readFile(nutritionDatabasePath)
+
+if ("nutrition" in nutritionWorkBook.Sheets == false)
+{
+  XLSX.utils.book_append_sheet(nutritionWorkBook, [], "nutrition")
+}
+const nutritionSourcesWorkSheet = nutritionWorkBook.Sheets["nutrition"]
+
+XLSX.writeFile(nutritionWorkBook, nutritionDatabasePath)
+
+// #endregion Nutrition database
+
+// #region Snippets database 
+const snippetsDatabasePath = './data/snippets.xlsx' 
+if (!fs.existsSync(snippetsDatabasePath))
+{
+  const newSnippetsWorkBook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(newSnippetsWorkBook, [], "meta")
+  XLSX.writeFile(newSnippetsWorkBook, snippetsDatabasePath)
+}
+const snippetsWorkBook = XLSX.readFile(snippetsDatabasePath)
+
+if ("snippets" in snippetsWorkBook.Sheets == false)
+{
+  XLSX.utils.book_append_sheet(snippetsWorkBook, [], "snippets")
+  XLSX.utils.sheet_add_aoa(snippetsWorkBook.Sheets["snippets"], [["Headers"]], {origin: 0})
+
+}
+const snippetsSourcesWorkSheet = snippetsWorkBook.Sheets["snippets"]
+
+XLSX.writeFile(snippetsWorkBook, snippetsDatabasePath)
+// #endregion Snippets database 
 
 const port = 3000
 const app = express()
@@ -86,23 +145,26 @@ app.delete("/nutrition/removesource/:id", function(req, res) {
 
 // Snippets
 app.get('/snippets', (req, res) => {
-  res.render('snippets', {snippets: userData.snippets})
+  res.render('snippets', {snippets: XLSX.utils.sheet_to_row_object_array(snippetsSourcesWorkSheet)})
 })
 
-app.post('/snippets/addsnippet', (req, res) => {
-  userData.snippets.snippets.push({ 
-    text: req.body.text
-  })
-  SaveUserData();
+app.post('/snippets/add', (req, res) => {
+  if (req.body.text.length > 0) {
+    XLSX.utils.sheet_add_aoa(snippetsSourcesWorkSheet, [[req.body.text]], {origin:-1})
+  }
+
+  XLSX.writeFile(snippetsWorkBook, snippetsDatabasePath)
+
   res.redirect('/snippets')
 })
 
 app.delete("/snippets/remove/:id", function(req, res) {
-  userData.snippets.snippets.splice(parseInt(req.params.id), 1)
-  SaveUserData();
-  res.redirect('/nutrition')
-})
+  delete_row(snippetsSourcesWorkSheet, req.params.id)
 
+  XLSX.writeFile(snippetsWorkBook, snippetsDatabasePath)
+
+  res.redirect('/snippets')
+})
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

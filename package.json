@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Luci404/Dagr#readme",
   "dependencies": {
     "ejs": "^3.1.6",
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "xlsx": "^0.17.5"
   }
 }
