@@ -6,9 +6,9 @@ const { json } = require('body-parser')
 
 const port = 3000
 const app = express()
-
-var jsonParser = bodyParser.json()
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
+app.set('view engine', 'ejs');
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 var userData = {}
 
@@ -39,15 +39,11 @@ function SaveUserData() {
 
 LoadUserData();
 
-app.get('/', (req, res) => {
-  res.sendFile('./index.html', { root: __dirname })
-})
-
 app.get('/nutrition', (req, res) => {
-  res.sendFile('./nutrition.html', { root: __dirname })
+  res.render('nutrition', {nutrition: userData.nutrition})
 })
 
-app.post('/nutrition/addsource', urlencodedParser, function (req, res) {
+app.post('/nutrition/addsource', function (req, res) {
   console.log(req.body)
   
   userData.nutrition.sources.push({ 
@@ -56,9 +52,12 @@ app.post('/nutrition/addsource', urlencodedParser, function (req, res) {
   })
   
   SaveUserData();
-
   res.redirect('/nutrition')
+})
 
+app.delete("/nutrition/removesource/:id", function(req, res) {
+  userData.nutrition.sources.splice(parseInt(req.params.id))
+  res.redirect('/nutrition')
 })
 
 app.listen(port, () => {
