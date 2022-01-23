@@ -105,6 +105,8 @@ app.post('/nutrition/report/add', (req, res) => {
 
   XLSX.utils.sheet_add_aoa(nutritionReportsWorkSheet, [[id, dateStr, ""]], { origin: -1 })
   XLSX.writeFile(nutritionWorkBook, nutritionDatabasePath)
+
+  res.redirect('/nutrition')
 })
 
 app.patch('/nutrition/report/:reportid/add/:sourceid', (req, res) => {
@@ -113,7 +115,7 @@ app.patch('/nutrition/report/:reportid/add/:sourceid', (req, res) => {
 
   if (reportIndex != -1) {
     var report = reportArray[reportIndex]
-    report.sources += req.params.sourceid
+    report.sources += `${(report.sources.length > 0) ? ", " : ""}${req.params.sourceid}`
 
     XLSX.utils.sheet_add_json(nutritionReportsWorkSheet, [report], { origin: reportIndex })
     XLSX.writeFile(nutritionWorkBook, nutritionDatabasePath)

@@ -14,6 +14,7 @@
         </form>
 
         <h2> Reports </h2>
+        <button onclick="addReport()">Add report</button>
         <% for( var i=0; i < reports.length; i++){ %>
             <li><%= reports[i].id %> | <%= reports[i].date %> | <%= reports[i].sources %></li>
         <% } %>
@@ -23,7 +24,7 @@
             <li>
                 <button onclick="removeSource('<%= sources[i].id %>')"> (Remove) </button>
                 <%= sources[i].name %>, <%= sources[i].calories %>
-                <button onclick="addSourceToReport('<%= sources[i].id  %>')"> (Add to report) </button>
+                <button onclick="addSourceToReport('<%= reports[0].id  %>', '<%= sources[i].id  %>')"> (Add to report) </button>
 
             </li>
         <% } %>
