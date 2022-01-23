@@ -37,6 +37,7 @@ const nutritionWorkBook = XLSX.readFile(nutritionDatabasePath)
 if ("nutrition" in nutritionWorkBook.Sheets == false)
 {
   XLSX.utils.book_append_sheet(nutritionWorkBook, [], "nutrition")
+  XLSX.utils.sheet_add_aoa(nutritionWorkBook.Sheets["nutrition"], [["id", "date", "name", "calories"]], {origin: 0})
 }
 const nutritionSourcesWorkSheet = nutritionWorkBook.Sheets["nutrition"]
 
@@ -57,8 +58,7 @@ const snippetsWorkBook = XLSX.readFile(snippetsDatabasePath)
 if ("snippets" in snippetsWorkBook.Sheets == false)
 {
   XLSX.utils.book_append_sheet(snippetsWorkBook, [], "snippets")
-  XLSX.utils.sheet_add_aoa(snippetsWorkBook.Sheets["snippets"], [["Headers"]], {origin: 0})
-
+  XLSX.utils.sheet_add_aoa(snippetsWorkBook.Sheets["snippets"], [["id", "date", "title", "text"]], {origin: 0})
 }
 const snippetsSourcesWorkSheet = snippetsWorkBook.Sheets["snippets"]
 
@@ -69,7 +69,7 @@ XLSX.writeFile(snippetsWorkBook, snippetsDatabasePath)
 const port = 3000
 const app = express()
 app.set('view engine', 'ejs');
-app.use(express.static("public"));
+app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 // #endregion
 
@@ -110,38 +110,54 @@ app.get('/', (req, res) => {
 
 // #region Nutrition routing
 app.get('/nutrition', (req, res) => {
-  res.render('nutrition', {nutrition: userData.nutrition})
+  res.render('nutrition', {sources: XLSX.utils.sheet_to_row_object_array(nutritionSourcesWorkSheet)})
 })
 
-app.patch('/nutrition/addsourcetoreport/:id', (req, res) => {
+app.patch('/nutrition/report/:reportid/add/:sourceid', (req, res) => {
   userData.nutrition.reports[0].sources.push(req.params.id)
   userData.nutrition.reports[0].calories += parseInt(userData.nutrition.sources[req.params.id].calories)
   SaveUserData();
   res.redirect('/nutrition')
 })
 
-app.patch('/nutrition/removesourcefromreport/:id', (req, res) => {
+app.patch('/nutrition/report/:reportid/remove/:sourceid', (req, res) => {
   userData.nutrition.reports[0].calories -= parseInt(userData.nutrition.sources[userData.nutrition.reports[0].sources[req.params.id]].calories)
   userData.nutrition.reports[0].sources.splice(req.params.id, 1)
   SaveUserData();
   res.redirect('/nutrition')
 })
 
-app.post('/nutrition/addsource', function (req, res) {
-  console.log(req.body)
-  
-  userData.nutrition.sources.push({ 
-    name: req.body.name, 
-    calories: parseInt(req.body.calories)
-  })
-  
-  SaveUserData();
+app.post('/nutrition/sources/add', function (req, res) {
+  // Generate a random (ish) id based on time.
+  // TODO: This id should be derived from an incremental counter located in the snippets meta sheet.
+  var id = `${new Date().getUTCMilliseconds()}_${Math.floor(Math.random() * 10000)}`
+
+  // Generate a date string in the format: yyyy/mm/dd hh:mm:ss
+  var date = new Date();
+  var dateStr =
+    date.getFullYear() + "/" +
+    ("00" + (date.getMonth() + 1)).slice(-2) + "/" +
+    ("00" + date.getDate()).slice(-2) + " " +
+    ("00" + date.getHours()).slice(-2) + ":" +
+    ("00" + date.getMinutes()).slice(-2) + ":" +
+    ("00" + date.getSeconds()).slice(-2);
+
+  XLSX.utils.sheet_add_aoa(nutritionSourcesWorkSheet, [[id, dateStr, req.body.name, parseInt(req.body.calories)]], {origin:-1})
+  XLSX.writeFile(nutritionWorkBook, nutritionDatabasePath)
   res.redirect('/nutrition')
 })
 
-app.delete("/nutrition/removesource/:id", function(req, res) {
-  userData.nutrition.sources.splice(parseInt(req.params.id), 1)
-  SaveUserData();
+app.delete("/nutrition/sources/remove/:id", function(req, res) {
+  console.log(req.params)
+  var objectArray = XLSX.utils.sheet_to_row_object_array(nutritionSourcesWorkSheet)
+  var elementIndex = objectArray.findIndex((obj) => {  return obj.id == req.params.id  })
+
+  if (elementIndex != -1)
+  {
+    delete_row(nutritionSourcesWorkSheet, elementIndex + 1)
+    XLSX.writeFile(nutritionWorkBook, nutritionDatabasePath)
+  }
+
   res.redirect('/nutrition')
 })
 // #endregion
@@ -152,14 +168,35 @@ app.get('/snippets', (req, res) => {
 })
 
 app.post('/snippets/add', (req, res) => {
-  XLSX.utils.sheet_add_aoa(snippetsSourcesWorkSheet, [[req.body.text]], {origin:-1})
+  // Generate a random (ish) id based on time.
+  // TODO: This id should be derived from an incremental counter located in the snippets meta sheet.
+  var id = `${new Date().getUTCMilliseconds()}_${Math.floor(Math.random() * 10000)}`
+
+  // Generate a date string in the format: yyyy/mm/dd hh:mm:ss
+  var date = new Date();
+  var dateStr =
+    date.getFullYear() + "/" +
+    ("00" + (date.getMonth() + 1)).slice(-2) + "/" +
+    ("00" + date.getDate()).slice(-2) + " " +
+    ("00" + date.getHours()).slice(-2) + ":" +
+    ("00" + date.getMinutes()).slice(-2) + ":" +
+    ("00" + date.getSeconds()).slice(-2);
+
+  XLSX.utils.sheet_add_aoa(snippetsSourcesWorkSheet, [[id, dateStr, "Untitled snippet", req.body.text]], {origin:-1})
   XLSX.writeFile(snippetsWorkBook, snippetsDatabasePath)
   res.redirect('/snippets')
 })
 
 app.delete("/snippets/remove/:id", function(req, res) {
-  delete_row(snippetsSourcesWorkSheet, req.params.id)
-  XLSX.writeFile(snippetsWorkBook, snippetsDatabasePath)
+  var objectArray = XLSX.utils.sheet_to_row_object_array(snippetsSourcesWorkSheet)
+  var elementIndex = objectArray.findIndex((obj) => {  return obj.id == req.params.id  })
+
+  if (elementIndex != -1)
+  {
+    delete_row(snippetsSourcesWorkSheet, elementIndex + 1)
+    XLSX.writeFile(snippetsWorkBook, snippetsDatabasePath)
+  }
+
   res.redirect('/snippets')
 })
 

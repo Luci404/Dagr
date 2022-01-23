@@ -1,38 +1,36 @@
 <html>
 
+<head>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
 <body>
-    <h1>Goal: 1900</h1>
-    <h1>Current: <%= nutrition.reports[0].calories %></h1>
+    <div class="main">
+        <h1>addsource</h1>
+        <form action="/nutrition/sources/add" method="post">
+            <input name="name" type="text">
+            <input name="calories" type="number">
+            <input type="submit" value="OK">
+        </form>
 
-    <form action="/nutrition/addsource" method="post">
-        <input name="name" type="text">
-        <input name="calories" type="number">
-        <input type="submit" value="OK">
-    </form>
+        <h2> Daily Report </h2>
 
-    <h2> Daily Report </h2>
-    <% for( var i=0; i < nutrition.reports[0].sources.length; i++){ %>
-        <li>
-            <button onclick="removeSourceFromReport(<%= i %>)"> (Remove) </button>
-            <%= nutrition.sources[nutrition.reports[0].sources[i]].name %> 
-        </li>
-    <% } %>
+        <h2> Sources </h2>
+        <% for( var i=0; i < sources.length; i++){ %>
+            <li>
+                <button onclick="removeSource('<%= sources[i].id %>')"> (Remove) </button>
+                <%= sources[i].name %>, <%= sources[i].calories %>
+                <button onclick="addSourceToReport('<%= sources[i].id  %>')"> (Add to report) </button>
 
+            </li>
+        <% } %>
+    </div>
 
-    <h2> Sources </h2>
-    <% for( var i=0; i < nutrition.sources.length; i++){ %>
-        <li>
-            <button onclick="removeSource(<%= i %>)"> (Remove) </button>
-            <%= nutrition.sources[i].name %>
-            <button onclick="addSourceToReport(<%= i %>)"> (Add to report) </button>
-
-        </li>
-    <% } %>
 
     <script>
         function removeSource(id) {
             const xhttp = new XMLHttpRequest();
-            xhttp.open("DELETE", `/nutrition/removesource/${id}`, true);
+            xhttp.open("DELETE", `/nutrition/sources/remove/${id}`, true);
             xhttp.onload = function () {
                 console.log("xhttp.onload")
                 location.reload();
@@ -43,7 +41,7 @@
         
         function addSourceToReport(id) {
             const xhttp = new XMLHttpRequest();
-            xhttp.open("PATCH", `/nutrition/addsourcetoreport/${id}`, true);
+            xhttp.open("PATCH", `/nutrition/sources/add/${id}`, true);
             xhttp.onload = function () {
                 console.log("xhttp.onload")
                 location.reload();
