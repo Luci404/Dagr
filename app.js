@@ -4,6 +4,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 // TODO: Deleting all elements in a xlsx worksheet will result in an error when saving; therefor don't allow deletion of the header row (row 0). 
+// TODO: Make come up with better solution for database stuff.
+// TODO: Replace json database with xlsx.
 
 //  #region XLSX helpers
 const ec = (r, c) => {
@@ -63,14 +65,15 @@ const snippetsSourcesWorkSheet = snippetsWorkBook.Sheets["snippets"]
 XLSX.writeFile(snippetsWorkBook, snippetsDatabasePath)
 // #endregion Snippets database 
 
+// #region Setup and configure app
 const port = 3000
 const app = express()
 app.set('view engine', 'ejs');
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
+// #endregion
 
-var userData = {}
-
+// #region JSON Database - deprecated
 function LoadUserData() {
   fs.readFile("./database.json", "utf8", (err, jsonString) => {
     if (err) {
@@ -97,19 +100,19 @@ function SaveUserData() {
 }
 
 LoadUserData();
+// #endregion
 
-
-// TODO: Make come up with propper architecture
-
+// #region Application routing
 app.get('/', (req, res) => {
   res.render('index')
 })
+// #endregion
 
+// #region Nutrition routing
 app.get('/nutrition', (req, res) => {
   res.render('nutrition', {nutrition: userData.nutrition})
 })
 
-// TODO: Rename
 app.patch('/nutrition/addsourcetoreport/:id', (req, res) => {
   userData.nutrition.reports[0].sources.push(req.params.id)
   userData.nutrition.reports[0].calories += parseInt(userData.nutrition.sources[req.params.id].calories)
@@ -117,7 +120,6 @@ app.patch('/nutrition/addsourcetoreport/:id', (req, res) => {
   res.redirect('/nutrition')
 })
 
-// TODO: Rename
 app.patch('/nutrition/removesourcefromreport/:id', (req, res) => {
   userData.nutrition.reports[0].calories -= parseInt(userData.nutrition.sources[userData.nutrition.reports[0].sources[req.params.id]].calories)
   userData.nutrition.reports[0].sources.splice(req.params.id, 1)
@@ -142,30 +144,26 @@ app.delete("/nutrition/removesource/:id", function(req, res) {
   SaveUserData();
   res.redirect('/nutrition')
 })
+// #endregion
 
-// Snippets
+// #region Snippets routing
 app.get('/snippets', (req, res) => {
   res.render('snippets', {snippets: XLSX.utils.sheet_to_row_object_array(snippetsSourcesWorkSheet)})
 })
 
 app.post('/snippets/add', (req, res) => {
-  if (req.body.text.length > 0) {
-    XLSX.utils.sheet_add_aoa(snippetsSourcesWorkSheet, [[req.body.text]], {origin:-1})
-  }
-
+  XLSX.utils.sheet_add_aoa(snippetsSourcesWorkSheet, [[req.body.text]], {origin:-1})
   XLSX.writeFile(snippetsWorkBook, snippetsDatabasePath)
-
   res.redirect('/snippets')
 })
 
 app.delete("/snippets/remove/:id", function(req, res) {
   delete_row(snippetsSourcesWorkSheet, req.params.id)
-
   XLSX.writeFile(snippetsWorkBook, snippetsDatabasePath)
-
   res.redirect('/snippets')
 })
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+// #endregion

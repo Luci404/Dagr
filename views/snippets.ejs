@@ -1,7 +1,78 @@
 <html>
 
+<head>
+    <!-- TODO: Make the html font-size different depending on resolution. -->
+    <style>
+        html {
+            font-size: 100%;
+        }
+
+        body {
+            background-color: #212528;
+            padding: 2rem 1rem;
+            margin: 0px;
+        }
+
+        #search {
+            background-color: #2A2E31;
+            height: 4rem;
+            border-radius: 2rem;
+            border: 0;
+            width: 100%;
+            display: block;
+            margin: 0;
+            font-size: 100%;
+            padding: 1.5rem;
+            color: #B8B8B8;
+        }
+
+        #search:focus {
+            outline: none;
+        }
+    </style>
+</head>
+
 <body>
-    
+
+    <input id="search" onkeyup="myFunction()" placeholder="Search snippets" autocomplete="off">
+
+    <ul id="myUL">
+        <li><a href="#">Adele</a></li>
+        <li><a href="#">Agnes</a></li>
+
+        <li><a href="#">Billy</a></li>
+        <li><a href="#">Bob</a></li>
+
+        <li><a href="#">Calvin</a></li>
+        <li><a href="#">Christina</a></li>
+        <li><a href="#">Cindy</a></li>
+    </ul>
+
+    <script>
+        function myFunction() {
+            // Declare variables
+            var input, filter, ul, li, a, i, txtValue;
+            input = document.getElementById('search');
+            filter = input.value.toUpperCase();
+            ul = document.getElementById("myUL");
+            li = ul.getElementsByTagName('li');
+
+            // Loop through all list items, and hide those who don't match the search query
+            for (i = 0; i < li.length; i++) {
+                a = li[i].getElementsByTagName("a")[0];
+                txtValue = a.textContent || a.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+    <br>
+    <br>
+    <br>
+
     <textarea name="text" form="addsnippet"></textarea>
     <form action="/snippets/add" method="post" id="addsnippet">
         <input type="submit" value="OK">
@@ -11,22 +82,22 @@
     <% for( var i=0; i < snippets.length; i++){ %>
         <li>
             <button onclick="removeSnippet(<%= i %>)"> (Remove) </button>
-            <%= snippets[i].Headers %> 
+            <%= snippets[i].Headers %>
         </li>
-    <% } %>
+        <% } %>
 
-    <script>
-        function removeSnippet(id) {
-            const xhttp = new XMLHttpRequest();
-            xhttp.open("DELETE", `/snippets/remove/${id}`, true);
-            xhttp.onload = function () {
-                console.log("xhttp.onload")
-                location.reload();
-                // TODO: Handle errors in xhttp.responseText, if (xhttp.readyState == 4 && xhttp.status) success.
-            }
-            xhttp.send(null);
-        }
-    </script>
+            <script>
+                function removeSnippet(id) {
+                    const xhttp = new XMLHttpRequest();
+                    xhttp.open("DELETE", `/snippets/remove/${id}`, true);
+                    xhttp.onload = function () {
+                        console.log("xhttp.onload")
+                        location.reload();
+                        // TODO: Handle errors in xhttp.responseText, if (xhttp.readyState == 4 && xhttp.status) success.
+                    }
+                    xhttp.send(null);
+                }
+            </script>
 </body>
 
 </html>
