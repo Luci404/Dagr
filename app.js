@@ -73,35 +73,6 @@ app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 // #endregion
 
-// #region JSON Database - deprecated
-function LoadUserData() {
-  fs.readFile("./database.json", "utf8", (err, jsonString) => {
-    if (err) {
-      console.log("File read failed:", err);
-      return;
-    }
-    try {
-      userData = JSON.parse(jsonString);
-    } catch (err) {
-      console.log("Error parsing JSON string:", err);
-    }
-  });
-}
-
-function SaveUserData() {
-  const jsonString = JSON.stringify(userData)
-  fs.writeFile('./database.json', jsonString, err => {
-    if (err) {
-      console.log('Error writing file', err)
-    } else {
-      console.log('Successfully wrote file')
-    }
-  })
-}
-
-LoadUserData();
-// #endregion
-
 // #region Application routing
 app.get('/', (req, res) => {
   res.render('index')
