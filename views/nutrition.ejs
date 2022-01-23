@@ -13,7 +13,10 @@
             <input type="submit" value="OK">
         </form>
 
-        <h2> Daily Report </h2>
+        <h2> Reports </h2>
+        <% for( var i=0; i < reports.length; i++){ %>
+            <li><%= reports[i].id %> | <%= reports[i].date %> | <%= reports[i].sources %></li>
+        <% } %>
 
         <h2> Sources </h2>
         <% for( var i=0; i < sources.length; i++){ %>
@@ -27,6 +30,17 @@
     </div>
 
     <script>
+        function addReport() {
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("POST", `/nutrition/report/add`, true);
+            xhttp.onload = function () {
+                console.log("xhttp.onload")
+                location.reload();
+                // TODO: Handle errors in xhttp.responseText, if (xhttp.readyState == 4 && xhttp.status) success.
+            }
+            xhttp.send(null);
+        }
+
         function removeSource(id) {
             const xhttp = new XMLHttpRequest();
             xhttp.open("DELETE", `/nutrition/sources/remove/${id}`, true);
@@ -38,9 +52,9 @@
             xhttp.send(null);
         }
         
-        function addSourceToReport(id) {
+        function addSourceToReport(reportid, sourceid) {
             const xhttp = new XMLHttpRequest();
-            xhttp.open("PATCH", `/nutrition/sources/add/${id}`, true);
+            xhttp.open("PATCH", `nutrition/report/${reportid}/add/${sourceid}`, true);
             xhttp.onload = function () {
                 console.log("xhttp.onload")
                 location.reload();
